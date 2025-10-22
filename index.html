@@ -1,15 +1,200 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Vin Cyril's Website</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintEase Order Receipt</title>
+    <style>
+        /* Basic styles for the receipt page */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .receipt {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+            width: 100%;
+            max-width: 420px;
+            padding: 28px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #1a202c;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 15px;
+            color: #555;
+        }
+        .details {
+            margin-bottom: 20px;
+        }
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            font-size: 16px;
+        }
+        .details-row strong {
+            color: #333;
+            font-weight: 600;
+        }
+        .details-row span {
+            color: #666;
+            text-align: right;
+            font-weight: 400;
+        }
+        .total {
+            border-top: 2px solid #333;
+            padding-top: 20px;
+            margin-top: 24px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        #loading, #error {
+            text-align: center;
+            font-size: 18px;
+            color: #888;
+            padding: 40px 0;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Hello World! I'm live on GitHub Pages.</h1>
+    <div class="receipt" id="receipt-container">
+        <!-- This content is hidden by default and shown when data loads -->
+        <div id="receipt-content" style="display: none;">
+            <div class="header">
+                <h1>PrintEase</h1>
+                <p>Official Order Receipt</p>
+            </div>
+            
+            <div class="details">
+                <div class="details-row">
+                    <strong>Order ID:</strong>
+                    <span id="order-id"></span>
+                </div>
+                <div class="details-row">
+                    <strong>Item:</strong>
+                    <span id="item-name"></span>
+                </div>
+                <div class="details-row">
+                    <strong>Quantity:</strong>
+                    <span id="quantity"></span>
+                </div>
+                <div class="details-row">
+                    <strong>Date:</strong>
+                    <span id="order-date"></span>
+                </div>
+                <div class="details-row">
+                    <strong>Status:</strong>
+                    <span id="status"></span>
+                </div>
+                <div class="details-row">
+                    <strong>Payment:</strong>
+                    <span id="payment-mode"></span>
+                </div>
+            </div>
 
-    <p>This is the start of my free website. I can add text, images, and links here.</p>
+            <div class="details total">
+                <div class="details-row">
+                    <span>Total Price</span>
+                    <span id="total-price"></span>
+                </div>
+            </div>
+        </div>
 
-    <a href="https://github.com/vincyril">Check out my GitHub Profile!</a>
+        <!-- These messages are shown during loading or if an error occurs -->
+        <div id="loading">Loading order details...</div>
+        <div id="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Get the pickup token from the URL (e.g., ?token=...)
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const contentEl = document.getElementById('receipt-content');
+            
+            if (!token) {
+                loadingEl.style.display = 'none';
+                errorEl.textContent = 'No Order Token provided in URL.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            // --- ⬇️  CRITICAL STEP ⬇️ ---
+            // Replace this placeholder with your *actual* deployed server URL.
+            // Example: "https://printease-backend.onrender.com"
+            const API_BASE_URL = "https://your-deployed-api-url.com"; 
+            
+            const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
+
+            // 2. Fetch the order data from your new public API
+            fetch(API_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle server errors like 404 (Not Found) or 500 (Server Error)
+                        throw new Error(`Order not found or server error (Status: ${response.status})`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 3. Populate the HTML elements with the fetched data
+                    document.getElementById('order-id').textContent = data.orderId.slice(-6).toUpperCase();
+                    document.getElementById('item-name').textContent = data.itemName;
+                    document.getElementById('quantity').textContent = data.quantity;
+                    document.getElementById('status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                    document.getElementById('payment-mode').textContent = data.modeOfPayment || 'N/A';
+                    
+                    // Format the total price into local currency (PHP)
+                    const formattedPrice = new Intl.NumberFormat('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    }).format(data.totalPrice);
+                    document.getElementById('total-price').textContent = formattedPrice;
+
+                    // Format the date for readability
+                    const formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    document.getElementById('order-date').textContent = formattedDate;
+
+                    // 4. Hide the loading message and show the populated receipt
+                    loadingEl.style.display = 'none';
+                    contentEl.style.display = 'block';
+                })
+                .catch(err => {
+                    // 5. If anything goes wrong, show an error message
+                    console.error('Failed to fetch receipt:', err);
+                    loadingEl.style.display = 'none';
+                    errorEl.textContent = 'Could not load order details. Please try again or contact support.';
+                    errorEl.style.display = 'block';
+                });
+        });
+    </script>
 
 </body>
 </html>
