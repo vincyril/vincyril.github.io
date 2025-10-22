@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrintEase Order Receipt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Basic styles for the receipt page */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f4f7f6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(to right, #1e3a8a, #0c0a09);
+            color: #e5e7eb; /* Light gray for default text */
             margin: 0;
             padding: 20px;
             display: flex;
@@ -17,31 +20,48 @@
             min-height: 100vh;
         }
         .receipt {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+            background-color: rgba(17, 24, 39, 0.8); /* Dark, semi-transparent */
+            border: 1px solid rgba(59, 130, 246, 0.5); /* Blue transparent border */
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
             width: 100%;
             max-width: 420px;
-            padding: 28px;
+            padding: 32px;
             box-sizing: border-box;
         }
         .header {
             text-align: center;
-            border-bottom: 2px dashed #eee;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 20px;
             margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            background-color: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
         }
         .header h1 {
             margin: 0;
-            font-size: 28px;
-            color: #1a202c;
+            font-size: 24px;
+            color: #ffffff;
             font-weight: 700;
         }
         .header p {
-            margin: 5px 0 0;
-            font-size: 15px;
-            color: #555;
+            margin: -5px 0 0;
+            font-size: 14px;
+            color: #9ca3af; /* Lighter gray for subtitle */
         }
         .details {
             margin-bottom: 20px;
@@ -49,31 +69,35 @@
         .details-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 14px;
-            font-size: 16px;
+            margin-bottom: 16px;
+            font-size: 15px;
         }
         .details-row strong {
-            color: #333;
-            font-weight: 600;
-        }
-        .details-row span {
-            color: #666;
-            text-align: right;
+            color: #9ca3af; /* Gray for labels */
             font-weight: 400;
         }
+        .details-row span {
+            color: #f9fafb; /* Almost white for values */
+            font-weight: 600;
+            text-align: right;
+        }
         .total {
-            border-top: 2px solid #333;
+            border-top: 2px solid #3b82f6; /* Bright blue accent line */
             padding-top: 20px;
             margin-top: 24px;
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
         }
         #loading, #error {
             text-align: center;
-            font-size: 18px;
-            color: #888;
+            font-size: 16px;
+            color: #9ca3af;
             padding: 40px 0;
             word-wrap: break-word;
+        }
+        #error strong {
+            color: white;
         }
     </style>
 </head>
@@ -82,6 +106,7 @@
     <div class="receipt" id="receipt-container">
         <div id="receipt-content" style="display: none;">
             <div class="header">
+                <div class="logo">P</div>
                 <h1>PrintEase</h1>
                 <p>Official Order Receipt</p>
             </div>
@@ -141,69 +166,68 @@
                 return;
             }
 
+            // Keep this pointed to your ngrok URL for testing, or your deployed URL later
             const API_BASE_URL = "https://worried-laurel-unmeasurably.ngrok-free.dev"; 
+            
             const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
 
-            // --- ⬇️ REVISED FETCH REQUEST ⬇️ ---
-            // We now include a special header to bypass the ngrok browser warning page,
-            // which was causing the "Unexpected token '<'" error.
             fetch(API_URL, {
                 headers: {
                     'ngrok-skip-browser-warning': 'true'
                 }
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Server responded with status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('order-id').textContent = data.orderId.slice(-6).toUpperCase();
-                    document.getElementById('item-name').textContent = data.itemName;
-                    document.getElementById('quantity').textContent = data.quantity;
-                    document.getElementById('status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                    document.getElementById('payment-mode').textContent = data.modeOfPayment || 'N/A';
-                    
-                    const formattedPrice = new Intl.NumberFormat('en-PH', {
-                        style: 'currency',
-                        currency: 'PHP'
-                    }).format(data.totalPrice);
-                    document.getElementById('total-price').textContent = formattedPrice;
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('order-id').textContent = '#' + data.orderId.slice(-6).toUpperCase();
+                document.getElementById('item-name').textContent = data.itemName;
+                document.getElementById('quantity').textContent = data.quantity;
+                document.getElementById('status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                document.getElementById('payment-mode').textContent = data.modeOfPayment || 'N/A';
+                
+                const formattedPrice = new Intl.NumberFormat('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP'
+                }).format(data.totalPrice);
+                document.getElementById('total-price').textContent = formattedPrice;
 
-                    let formattedDate = 'N/A';
-                    if (data.orderDate) {
-                        try {
-                            formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                        } catch (e) {
-                            console.error("Could not parse date:", data.orderDate, e);
-                            formattedDate = data.orderDate.split('T')[0];
-                        }
+                let formattedDate = 'N/A';
+                if (data.orderDate) {
+                    try {
+                        formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    } catch (e) {
+                        console.error("Could not parse date:", data.orderDate, e);
+                        formattedDate = data.orderDate.split('T')[0];
                     }
-                    document.getElementById('order-date').textContent = formattedDate;
+                }
+                document.getElementById('order-date').textContent = formattedDate;
 
-                    loadingEl.style.display = 'none';
-                    contentEl.style.display = 'block';
-                })
-                .catch(err => {
-                    console.error('Failed to fetch receipt:', err);
-                    loadingEl.style.display = 'none';
-                    
-                    let errorMessage = `<strong>Error:</strong><br>${err.message}`;
-                    if (err.message.includes('Failed to fetch')) {
-                        errorMessage += '<br><br>This is often a CORS or network issue. Check the ngrok and server terminals.';
-                    }
-                     if (err.message.includes('Unexpected token')) {
-                        errorMessage += '<br><br>The server sent HTML instead of JSON. This can be an ngrok warning or a server error.';
-                    }
-                    
-                    errorEl.innerHTML = errorMessage;
-                    errorEl.style.display = 'block';
-                });
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+            })
+            .catch(err => {
+                console.error('Failed to fetch receipt:', err);
+                loadingEl.style.display = 'none';
+                
+                let errorMessage = `<strong>Error:</strong><br>${err.message}`;
+                if (err.message.includes('Failed to fetch')) {
+                    errorMessage += '<br><br>This is often a CORS or network issue. Check the ngrok and server terminals.';
+                }
+                 if (err.message.includes('Unexpected token')) {
+                    errorMessage += '<br><br>The server sent HTML instead of JSON. This can be an ngrok warning or a server error.';
+                }
+                
+                errorEl.innerHTML = errorMessage;
+                errorEl.style.display = 'block';
+            });
         });
     </script>
 
