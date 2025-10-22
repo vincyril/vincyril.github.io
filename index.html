@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -30,6 +32,7 @@
             max-width: 420px;
             padding: 32px;
             box-sizing: border-box;
+            position: relative;
         }
         .header {
             text-align: center;
@@ -51,9 +54,6 @@
             font-size: 14px;
             color: #9ca3af;
         }
-        .details {
-            margin-bottom: 20px;
-        }
         .details-row {
             display: flex;
             justify-content: space-between;
@@ -72,7 +72,7 @@
         .total {
             border-top: 2px solid #3b82f6;
             padding-top: 20px;
-            margin-top: 24px;
+            margin-top: 8px;
             font-size: 20px;
             font-weight: 700;
             color: #ffffff;
@@ -84,8 +84,35 @@
             padding: 40px 0;
             word-wrap: break-word;
         }
-        #error strong {
+        #error strong { color: white; }
+
+        .actions {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .download-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
             color: white;
+            background-color: #2563eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .download-btn:hover {
+            background-color: #1d4ed8;
+        }
+        .download-btn:disabled {
+            background-color: #374151;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -93,132 +120,171 @@
 
     <div class="receipt" id="receipt-container">
         <div id="receipt-content" style="display: none;">
-            <div class="header">
-                <h1>PrintEase</h1>
-                <p>Official Order Receipt</p>
-            </div>
-            
-            <div class="details">
-                <div class="details-row">
-                    <strong>Order ID:</strong>
-                    <span id="order-id"></span>
+            <!-- This div is for screen display only -->
+            <div>
+                <div class="header">
+                    <h1>PrintEase</h1>
+                    <p>Official Order Receipt</p>
                 </div>
-                <div class="details-row">
-                    <strong>Item:</strong>
-                    <span id="item-name"></span>
+                <div class="details">
+                    <div class="details-row"><strong>Order ID:</strong><span id="order-id"></span></div>
+                    <div class="details-row"><strong>Item:</strong><span id="item-name"></span></div>
+                    <div class="details-row"><strong>Quantity:</strong><span id="quantity"></span></div>
+                    <div class="details-row"><strong>Date:</strong><span id="order-date"></span></div>
+                    <div class="details-row"><strong>Status:</strong><span id="status"></span></div>
+                    <div class="details-row"><strong>Payment:</strong><span id="payment-mode"></span></div>
                 </div>
-                <div class="details-row">
-                    <strong>Quantity:</strong>
-                    <span id="quantity"></span>
-                </div>
-                <div class="details-row">
-                    <strong>Date:</strong>
-                    <span id="order-date"></span>
-                </div>
-                <div class="details-row">
-                    <strong>Status:</strong>
-                    <span id="status"></span>
-                </div>
-                <div class="details-row">
-                    <strong>Payment:</strong>
-                    <span id="payment-mode"></span>
+                <div class="details total">
+                    <div class="details-row"><span>Total Price</span><span id="total-price"></span></div>
                 </div>
             </div>
-
-            <div class="details total">
-                <div class="details-row">
-                    <span>Total Price</span>
-                    <span id="total-price"></span>
-                </div>
+            <div class="actions">
+                <button class="download-btn" id="download-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Download Receipt</span>
+                </button>
             </div>
         </div>
-
         <div id="loading">Loading order details...</div>
         <div id="error" style="display: none;"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            let orderData = null;
+            
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const receiptContentEl = document.getElementById('receipt-content');
+            const downloadButton = document.getElementById('download-button');
+
             const params = new URLSearchParams(window.location.search);
             const token = params.get('token');
 
-            const loadingEl = document.getElementById('loading');
-            const errorEl = document.getElementById('error');
-            const contentEl = document.getElementById('receipt-content');
-            
             if (!token) {
                 loadingEl.style.display = 'none';
-                errorEl.textContent = 'No Order Token provided in URL.';
+                errorEl.innerHTML = '<strong>Error:</strong><br>No Order Token provided in URL.';
                 errorEl.style.display = 'block';
                 return;
             }
 
-            // --- ⬇️ LIVE TESTING URL ⬇️ ---
-            // This URL must point to your running ngrok tunnel.
             const API_BASE_URL = "https://worried-laurel-unmeasurably.ngrok-free.dev"; 
-            
             const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
 
-            fetch(API_URL, {
-                headers: {
-                    'ngrok-skip-browser-warning': 'true'
+            // --- REVISED PDF DOWNLOAD LOGIC ---
+            downloadButton.addEventListener('click', () => {
+                const downloadBtnSpan = downloadButton.querySelector('span');
+                if (!orderData || !window.jspdf) return;
+
+                downloadButton.disabled = true;
+                downloadBtnSpan.textContent = 'Generating PDF...';
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const margin = 15;
+                    let y = 20;
+
+                    // --- PDF STYLING AND CONTENT ---
+                    pdf.setFont("helvetica", "bold");
+                    pdf.setFontSize(22);
+                    pdf.text("PrintEase", pageWidth / 2, y, { align: "center" });
+                    y += 8;
+                    
+                    pdf.setFont("helvetica", "normal");
+                    pdf.setFontSize(12);
+                    pdf.text("Official Order Receipt", pageWidth / 2, y, { align: "center" });
+                    y += 12;
+
+                    pdf.setLineWidth(0.2);
+                    pdf.line(margin, y, pageWidth - margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    const addLineItem = (label, value) => {
+                        pdf.setFont("helvetica", "bold");
+                        pdf.text(label, margin, y);
+                        pdf.setFont("helvetica", "normal");
+                        pdf.text(String(value), pageWidth - margin, y, { align: "right" });
+                        y += 7;
+                    };
+
+                    addLineItem("Order ID:", '#' + orderData.orderId.slice(-6).toUpperCase());
+                    addLineItem("Item:", orderData.itemName);
+                    addLineItem("Quantity:", orderData.quantity);
+                    addLineItem("Date:", document.getElementById('order-date').textContent);
+                    addLineItem("Status:", orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1));
+                    addLineItem("Payment:", orderData.modeOfPayment || 'N/A');
+                    y += 5;
+                    
+                    pdf.line(margin, y, pageWidth - margin, y);
+                    y += 10;
+                    
+                    pdf.setFont("helvetica", "bold");
+                    pdf.setFontSize(14);
+                    pdf.text("Total Price", margin, y);
+                    pdf.text(document.getElementById('total-price').textContent, pageWidth - margin, y, { align: "right" });
+                    
+                    pdf.save(`PrintEase-Receipt-${orderData.orderId.slice(-6)}.pdf`);
+                    
+                    downloadBtnSpan.textContent = 'Downloaded!';
+                    setTimeout(() => {
+                        downloadButton.disabled = false;
+                        downloadBtnSpan.textContent = 'Download Receipt';
+                    }, 2000);
+
+                } catch (err) {
+                    console.error("PDF generation failed:", err);
+                    downloadBtnSpan.textContent = 'Download Failed';
+                     setTimeout(() => {
+                        downloadButton.disabled = false;
+                        downloadBtnSpan.textContent = 'Download Receipt';
+                    }, 3000);
                 }
-            })
+            });
+
+
+            // --- Main Data Fetching Logic ---
+            fetch(API_URL, { headers: { 'ngrok-skip-browser-warning': 'true' } })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server responded with status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
                 return response.json();
             })
             .then(data => {
+                orderData = data; 
                 document.getElementById('order-id').textContent = '#' + data.orderId.slice(-6).toUpperCase();
                 document.getElementById('item-name').textContent = data.itemName;
                 document.getElementById('quantity').textContent = data.quantity;
                 document.getElementById('status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
                 document.getElementById('payment-mode').textContent = data.modeOfPayment || 'N/A';
                 
-                const formattedPrice = new Intl.NumberFormat('en-PH', {
-                    style: 'currency',
-                    currency: 'PHP'
-                }).format(data.totalPrice);
+                const formattedPrice = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(data.totalPrice);
                 document.getElementById('total-price').textContent = formattedPrice;
 
-                // --- Revised Date Handling ---
                 let formattedDate = 'N/A';
                 if (data.orderDate) {
                     try {
-                        formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        });
+                        formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                     } catch (e) {
-                        console.error("Could not parse date:", data.orderDate, e);
                         formattedDate = data.orderDate.split('T')[0];
                     }
                 }
                 document.getElementById('order-date').textContent = formattedDate;
 
                 loadingEl.style.display = 'none';
-                contentEl.style.display = 'block';
+                receiptContentEl.style.display = 'block';
             })
             .catch(err => {
                 console.error('Failed to fetch receipt:', err);
                 loadingEl.style.display = 'none';
-                
                 let errorMessage = `<strong>Error:</strong><br>${err.message}`;
-                if (err.message.includes('Failed to fetch')) {
-                    errorMessage += '<br><br>This could be a CORS or network issue. Check the server terminals.';
-                }
-                 if (err.message.includes('Unexpected token')) {
-                    errorMessage += '<br><br>The server may have sent an error page (HTML) instead of order data (JSON).';
-                }
-                
+                if (err.message.includes('Failed to fetch')) errorMessage += '<br><br>This is a CORS or network issue. Check the ngrok and server terminals.';
                 errorEl.innerHTML = errorMessage;
                 errorEl.style.display = 'block';
             });
         });
     </script>
-
 </body>
 </html>
+
