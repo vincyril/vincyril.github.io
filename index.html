@@ -176,11 +176,23 @@
                     }).format(data.totalPrice);
                     document.getElementById('total-price').textContent = formattedPrice;
 
-                    const formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    });
+                    // --- ⬇️ REVISED DATE HANDLING ⬇️ ---
+                    // Format the date for readability, with added safety checks for different browser compatibility.
+                    let formattedDate = 'N/A';
+                    if (data.orderDate) {
+                        try {
+                            // Try to parse the date normally
+                            formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+                        } catch (e) {
+                            console.error("Could not parse date:", data.orderDate, e);
+                            // If parsing fails, just show the raw string before the 'T'
+                            formattedDate = data.orderDate.split('T')[0];
+                        }
+                    }
                     document.getElementById('order-date').textContent = formattedDate;
 
                     loadingEl.style.display = 'none';
