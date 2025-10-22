@@ -143,10 +143,10 @@
                 return;
             }
 
-            // --- ⬇️ CONFIGURED FOR LOCAL TESTING ⬇️ ---
-            // This URL points to your local backend server.
-            // When you deploy your backend, you will replace this with your public URL.
-            const API_BASE_URL = "http://localhost:8000"; 
+            // --- ⬇️ LIVE TESTING URL ⬇️ ---
+            // This URL is from ngrok and connects to your local machine.
+            // It will only work as long as you keep ngrok running.
+            const API_BASE_URL = "https://worried-laurel-unmeasurably.ngrok-free.dev"; 
             
             const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
 
