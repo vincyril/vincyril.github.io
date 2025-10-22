@@ -143,10 +143,10 @@
                 return;
             }
 
-            // --- ⬇️  CRITICAL STEP ⬇️ ---
-            // Replace this placeholder with your *actual* deployed server URL.
-            // Example: "https://printease-backend.onrender.com"
-            const API_BASE_URL = "https://your-deployed-api-url.com"; 
+            // --- ⬇️ CONFIGURED FOR LOCAL TESTING ⬇️ ---
+            // This URL points to your local backend server.
+            // When you deploy your backend, you will replace this with your public URL.
+            const API_BASE_URL = "http://localhost:8000"; 
             
             const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
 
@@ -198,3 +198,4 @@
 
 </body>
 </html>
+
