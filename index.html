@@ -11,7 +11,7 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(to right, #1e3a8a, #0c0a09);
-            color: #e5e7eb; /* Light gray for default text */
+            color: #e5e7eb;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -20,11 +20,12 @@
             min-height: 100vh;
         }
         .receipt {
-            background-color: rgba(17, 24, 39, 0.8); /* Dark, semi-transparent */
-            border: 1px solid rgba(59, 130, 246, 0.5); /* Blue transparent border */
+            background-color: rgba(17, 24, 39, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.5);
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             width: 100%;
             max-width: 420px;
             padding: 32px;
@@ -41,7 +42,6 @@
             font-size: 32px;
             font-weight: 700;
             letter-spacing: 0.5px;
-            /* Create a gradient text effect */
             background: -webkit-linear-gradient(45deg, #a5b4fc, #60a5fa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -49,7 +49,7 @@
         .header p {
             margin: 0;
             font-size: 14px;
-            color: #9ca3af; /* Lighter gray for subtitle */
+            color: #9ca3af;
         }
         .details {
             margin-bottom: 20px;
@@ -61,16 +61,16 @@
             font-size: 15px;
         }
         .details-row strong {
-            color: #9ca3af; /* Gray for labels */
+            color: #9ca3af;
             font-weight: 400;
         }
         .details-row span {
-            color: #f9fafb; /* Almost white for values */
+            color: #f9fafb;
             font-weight: 600;
             text-align: right;
         }
         .total {
-            border-top: 2px solid #3b82f6; /* Bright blue accent line */
+            border-top: 2px solid #3b82f6;
             padding-top: 20px;
             margin-top: 24px;
             font-size: 20px;
@@ -153,12 +153,16 @@
                 return;
             }
 
-            // Keep this pointed to your ngrok URL for testing, or your deployed URL later
-            const API_BASE_URL = "https://worried-laurel-unmeasurably.ngrok-free.dev"; 
+            // --- ⬇️ FINAL DEPLOYMENT URL ⬇️ ---
+            // When you are ready to go live, replace this placeholder
+            // with your actual deployed server URL (e.g., from Render.com).
+            const API_BASE_URL = "https://your-deployed-api-url.com"; 
             
             const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
 
             fetch(API_URL, {
+                // The 'ngrok-skip-browser-warning' header is not needed for a deployed server,
+                // but it does not cause any harm to leave it in.
                 headers: {
                     'ngrok-skip-browser-warning': 'true'
                 }
@@ -182,17 +186,20 @@
                 }).format(data.totalPrice);
                 document.getElementById('total-price').textContent = formattedPrice;
 
+                // --- Revised Date Handling ---
                 let formattedDate = 'N/A';
                 if (data.orderDate) {
                     try {
+                        // This is the ideal way to format the date
                         formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
                         });
                     } catch (e) {
+                        // This is a fallback for browsers that are strict about date formats
                         console.error("Could not parse date:", data.orderDate, e);
-                        formattedDate = data.orderDate.split('T')[0];
+                        formattedDate = data.orderDate.split('T')[0]; // Shows YYYY-MM-DD
                     }
                 }
                 document.getElementById('order-date').textContent = formattedDate;
@@ -206,10 +213,10 @@
                 
                 let errorMessage = `<strong>Error:</strong><br>${err.message}`;
                 if (err.message.includes('Failed to fetch')) {
-                    errorMessage += '<br><br>This is often a CORS or network issue. Check the ngrok and server terminals.';
+                    errorMessage += '<br><br>This could be a CORS or network issue. Check the server terminals.';
                 }
                  if (err.message.includes('Unexpected token')) {
-                    errorMessage += '<br><br>The server sent HTML instead of JSON. This can be an ngrok warning or a server error.';
+                    errorMessage += '<br><br>The server may have sent an error page (HTML) instead of order data (JSON).';
                 }
                 
                 errorEl.innerHTML = errorMessage;
