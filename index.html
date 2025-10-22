@@ -73,18 +73,16 @@
             font-size: 18px;
             color: #888;
             padding: 40px 0;
-            word-wrap: break-word; /* Ensure long errors wrap */
+            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
 
     <div class="receipt" id="receipt-container">
-        <!-- This content is hidden by default and shown when data loads -->
         <div id="receipt-content" style="display: none;">
             <div class="header">
-                <!-- ⬇️ VISIBLE CHANGE FOR TESTING ⬇️ -->
-                <h1>PrintEase V2 TEST</h1>
+                <h1>PrintEase</h1>
                 <p>Official Order Receipt</p>
             </div>
             
@@ -123,24 +121,19 @@
             </div>
         </div>
 
-        <!-- These messages are shown during loading or if an error occurs -->
         <div id="loading">Loading order details...</div>
         <div id="error" style="display: none;"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+
             const loadingEl = document.getElementById('loading');
             const errorEl = document.getElementById('error');
             const contentEl = document.getElementById('receipt-content');
             
-            // --- ⬇️ NEW DEBUGGING CODE ⬇️ ---
-            console.log("Script loaded. Starting receipt fetch process...");
-            errorEl.innerHTML = ''; // Clear previous errors
-
-            const params = new URLSearchParams(window.location.search);
-            const token = params.get('token');
-
             if (!token) {
                 loadingEl.style.display = 'none';
                 errorEl.textContent = 'No Order Token provided in URL.';
@@ -151,19 +144,21 @@
             const API_BASE_URL = "https://worried-laurel-unmeasurably.ngrok-free.dev"; 
             const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
 
-            // --- ⬇️ NEW DEBUGGING CODE ⬇️ ---
-            console.log("Attempting to fetch from URL:", API_URL);
-
-            fetch(API_URL)
+            // --- ⬇️ REVISED FETCH REQUEST ⬇️ ---
+            // We now include a special header to bypass the ngrok browser warning page,
+            // which was causing the "Unexpected token '<'" error.
+            fetch(API_URL, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            })
                 .then(response => {
-                    console.log("Received response from server:", response);
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Successfully parsed JSON data:", data);
                     document.getElementById('order-id').textContent = data.orderId.slice(-6).toUpperCase();
                     document.getElementById('item-name').textContent = data.itemName;
                     document.getElementById('quantity').textContent = data.quantity;
@@ -176,12 +171,9 @@
                     }).format(data.totalPrice);
                     document.getElementById('total-price').textContent = formattedPrice;
 
-                    // --- ⬇️ REVISED DATE HANDLING ⬇️ ---
-                    // Format the date for readability, with added safety checks for different browser compatibility.
                     let formattedDate = 'N/A';
                     if (data.orderDate) {
                         try {
-                            // Try to parse the date normally
                             formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
@@ -189,7 +181,6 @@
                             });
                         } catch (e) {
                             console.error("Could not parse date:", data.orderDate, e);
-                            // If parsing fails, just show the raw string before the 'T'
                             formattedDate = data.orderDate.split('T')[0];
                         }
                     }
@@ -199,15 +190,15 @@
                     contentEl.style.display = 'block';
                 })
                 .catch(err => {
-                    // --- ⬇️ REVISED ERROR HANDLING ⬇️ ---
-                    // This will now display the detailed error on the screen.
                     console.error('Failed to fetch receipt:', err);
                     loadingEl.style.display = 'none';
                     
-                    // Display a more detailed error message
                     let errorMessage = `<strong>Error:</strong><br>${err.message}`;
                     if (err.message.includes('Failed to fetch')) {
                         errorMessage += '<br><br>This is often a CORS or network issue. Check the ngrok and server terminals.';
+                    }
+                     if (err.message.includes('Unexpected token')) {
+                        errorMessage += '<br><br>The server sent HTML instead of JSON. This can be an ngrok warning or a server error.';
                     }
                     
                     errorEl.innerHTML = errorMessage;
