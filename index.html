@@ -35,31 +35,19 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 20px;
             margin-bottom: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-        .logo {
-            width: 40px;
-            height: 40px;
-            background-color: #3b82f6;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 24px;
         }
         .header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #ffffff;
+            margin: 0 0 8px 0;
+            font-size: 32px;
             font-weight: 700;
+            letter-spacing: 0.5px;
+            /* Create a gradient text effect */
+            background: -webkit-linear-gradient(45deg, #a5b4fc, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .header p {
-            margin: -5px 0 0;
+            margin: 0;
             font-size: 14px;
             color: #9ca3af; /* Lighter gray for subtitle */
         }
@@ -106,7 +94,6 @@
     <div class="receipt" id="receipt-container">
         <div id="receipt-content" style="display: none;">
             <div class="header">
-                <div class="logo">P</div>
                 <h1>PrintEase</h1>
                 <p>Official Order Receipt</p>
             </div>
