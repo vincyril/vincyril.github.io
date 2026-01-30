@@ -3,288 +3,899 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrintEase Order Receipt</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- jsPDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>My Portfolio | Web Developer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(to right, #1e3a8a, #0c0a09);
-            color: #e5e7eb;
+        * {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .receipt {
-            background-color: rgba(17, 24, 39, 0.8);
-            border: 1px solid rgba(59, 130, 246, 0.5);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            width: 100%;
-            max-width: 420px;
-            padding: 32px;
+            padding: 0;
             box-sizing: border-box;
-            position: relative;
         }
-        .header {
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 20px;
-            margin-bottom: 24px;
+
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #4a44c6;
+            --dark-color: #2a2a3c;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --success-color: #36d399;
+            --transition: all 0.3s ease;
         }
-        .header h1 {
-            margin: 0 0 8px 0;
-            font-size: 32px;
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Raleway', sans-serif;
             font-weight: 700;
-            letter-spacing: 0.5px;
-            background: -webkit-linear-gradient(45deg, #a5b4fc, #60a5fa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+            margin-bottom: 1rem;
         }
-        .header p {
-            margin: 0;
-            font-size: 14px;
-            color: #9ca3af;
+
+        a {
+            text-decoration: none;
+            color: inherit;
         }
-        .details-row {
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 4px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 20px 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 15px 0;
+            background-color: rgba(255, 255, 255, 0.98);
+        }
+
+        .navbar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 16px;
-            font-size: 15px;
+            align-items: center;
         }
-        .details-row strong {
-            color: #9ca3af;
-            font-weight: 400;
-        }
-        .details-row span {
-            color: #f9fafb;
-            font-weight: 600;
-            text-align: right;
-        }
-        .total {
-            border-top: 2px solid #3b82f6;
-            padding-top: 20px;
-            margin-top: 8px;
-            font-size: 20px;
-            font-weight: 700;
-            color: #ffffff;
-        }
-        #loading, #error {
-            text-align: center;
-            font-size: 16px;
-            color: #9ca3af;
-            padding: 40px 0;
-            word-wrap: break-word;
-        }
-        #error strong { color: white; }
 
-        .actions {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-color);
         }
-        .download-btn {
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            background-color: #2563eb;
-            border: none;
-            border-radius: 8px;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary-color);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            color: var(--dark-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7ff 0%, #f0f2ff 100%);
+            padding-top: 100px;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+        }
+
+        .hero-text h1 span {
+            color: var(--primary-color);
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: var(--gray-color);
+            margin-bottom: 30px;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-text h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+            color: var(--gray-color);
+        }
+
+        .skills {
+            margin-top: 30px;
+        }
+
+        .skill-item {
+            margin-bottom: 25px;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .skill-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            width: 0;
+            transition: width 1.5s ease;
+        }
+
+        /* Portfolio Section */
+        .portfolio {
+            background-color: #f8f9fa;
+        }
+
+        .portfolio-filter {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .portfolio-item {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .portfolio-img {
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .portfolio-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .portfolio-item:hover .portfolio-img img {
+            transform: scale(1.05);
+        }
+
+        .portfolio-info {
+            padding: 20px;
+        }
+
+        .portfolio-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        /* Contact Section */
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
         }
-        .download-btn:hover {
-            background-color: #1d4ed8;
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
         }
-        .download-btn:disabled {
-            background-color: #374151;
-            cursor: not-allowed;
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .footer-logo span {
+            color: var(--primary-color);
+        }
+
+        .footer-about p {
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero-content,
+            .about-content,
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .hero-text h1 {
+                font-size: 2.8rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                flex-direction: column;
+                background-color: white;
+                padding: 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 999;
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-text h1 {
+                font-size: 2.4rem;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-btns {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Header & Navigation -->
+    <header id="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">Port<span>folio</span></a>
+                
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+                
+                <ul class="nav-links">
+                    <li><a href="#home" class="active">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#portfolio">Portfolio</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    <div class="receipt" id="receipt-container">
-        <div id="receipt-content" style="display: none;">
-            <!-- This div is for screen display only -->
-            <div>
-                <div class="header">
-                    <h1>PrintEase</h1>
-                    <p>Official Order Receipt</p>
+    <!-- Hero Section -->
+    <section id="home" class="hero section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Hi, I'm <span>Alex Morgan</span><br>Web Developer</h1>
+                    <p>I create beautiful, functional websites and applications that help businesses grow online. With 5+ years of experience in front-end and back-end development.</p>
+                    <div class="hero-btns">
+                        <a href="#portfolio" class="btn btn-primary">View My Work</a>
+                        <a href="#contact" class="btn btn-outline">Contact Me</a>
+                    </div>
                 </div>
-                <div class="details">
-                    <div class="details-row"><strong>Order ID:</strong><span id="order-id"></span></div>
-                    <div class="details-row"><strong>Item:</strong><span id="item-name"></span></div>
-                    <div class="details-row"><strong>Quantity:</strong><span id="quantity"></span></div>
-                    <div class="details-row"><strong>Date:</strong><span id="order-date"></span></div>
-                    <div class="details-row"><strong>Status:</strong><span id="status"></span></div>
-                    <div class="details-row"><strong>Payment:</strong><span id="payment-mode"></span></div>
+                <div class="hero-image">
+                    <!-- You can replace this with your own image -->
+                    <div style="background-color: #6c63ff; color: white; height: 400px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-size: 1.5rem;">
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="fas fa-user" style="font-size: 8rem; margin-bottom: 20px;"></i>
+                            <p>Your Photo Here</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="details total">
-                    <div class="details-row"><span>Total Price</span><span id="total-price"></span></div>
-                </div>
-            </div>
-            <div class="actions">
-                <button class="download-btn" id="download-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    <span>Download Receipt</span>
-                </button>
             </div>
         </div>
-        <div id="loading">Loading order details...</div>
-        <div id="error" style="display: none;"></div>
-    </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>About Me</h2>
+            </div>
+            
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>I design and develop experiences that make people's lives simple.</h3>
+                    <p>I'm a passionate web developer with expertise in HTML, CSS, JavaScript, and modern frameworks. I love turning complex problems into simple, beautiful, and intuitive designs.</p>
+                    <p>My journey in web development started 5 years ago, and since then I've worked with various clients from small businesses to large corporations, helping them establish their online presence.</p>
+                    
+                    <div class="skills">
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span>Web Development</span>
+                                <span>95%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="95"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span>UI/UX Design</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="85"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span>JavaScript</span>
+                                <span>90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="90"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <!-- You can replace this with your own image -->
+                    <div style="background-color: #f0f2ff; height: 400px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--dark-color); font-size: 1.5rem;">
+                        <div style="text-align: center;">
+                            <i class="fas fa-laptop-code" style="font-size: 8rem; margin-bottom: 20px; color: var(--primary-color);"></i>
+                            <p>About Me Image</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="portfolio section">
+        <div class="container">
+            <div class="section-title">
+                <h2>My Portfolio</h2>
+            </div>
+            
+            <div class="portfolio-filter">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="web">Web Development</button>
+                <button class="filter-btn" data-filter="design">UI/UX Design</button>
+                <button class="filter-btn" data-filter="mobile">Mobile Apps</button>
+            </div>
+            
+            <div class="portfolio-grid">
+                <!-- Portfolio Item 1 -->
+                <div class="portfolio-item" data-category="web">
+                    <div class="portfolio-img">
+                        <div style="background-color: #36d399; height: 220px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                            <i class="fas fa-shopping-cart" style="font-size: 4rem;"></i>
+                        </div>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>E-Commerce Website</h3>
+                        <p>Full-featured online store with shopping cart, payment integration, and admin dashboard.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 2 -->
+                <div class="portfolio-item" data-category="design">
+                    <div class="portfolio-img">
+                        <div style="background-color: #6c63ff; height: 220px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                            <i class="fas fa-palette" style="font-size: 4rem;"></i>
+                        </div>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>Travel App UI Design</h3>
+                        <p>Modern and intuitive user interface design for a travel booking mobile application.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 3 -->
+                <div class="portfolio-item" data-category="mobile">
+                    <div class="portfolio-img">
+                        <div style="background-color: #ff6584; height: 220px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                            <i class="fas fa-mobile-alt" style="font-size: 4rem;"></i>
+                        </div>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>Fitness Tracker App</h3>
+                        <p>Cross-platform mobile application for tracking workouts, nutrition, and fitness goals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact Me</h2>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h3>Location</h3>
+                            <p>San Francisco, California</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div>
+                            <h3>Phone</h3>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h3>Email</h3>
+                            <p>hello@example.com</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                        <input type="text" placeholder="Subject" required>
+                        <textarea rows="5" placeholder="Your Message" required></textarea>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">Port<span>folio</span></div>
+                    <p>Creating beautiful, functional websites and applications that help businesses grow online.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-services">
+                    <h3>My Services</h3>
+                    <ul>
+                        <li><a href="#">Web Development</a></li>
+                        <li><a href="#">UI/UX Design</a></li>
+                        <li><a href="#">Mobile Apps</a></li>
+                        <li><a href="#">SEO Optimization</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 My Portfolio. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            let orderData = null;
-            
-            const loadingEl = document.getElementById('loading');
-            const errorEl = document.getElementById('error');
-            const receiptContentEl = document.getElementById('receipt-content');
-            const downloadButton = document.getElementById('download-button');
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-bars');
+            this.querySelector('i').classList.toggle('fa-times');
+        });
 
-            const params = new URLSearchParams(window.location.search);
-            const token = params.get('token');
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.querySelector('.nav-links').classList.remove('active');
+                document.querySelector('.mobile-menu-btn i').classList.remove('fa-times');
+                document.querySelector('.mobile-menu-btn i').classList.add('fa-bars');
+            });
+        });
 
-            if (!token) {
-                loadingEl.style.display = 'none';
-                errorEl.innerHTML = '<strong>Error:</strong><br>No Order Token provided in URL.';
-                errorEl.style.display = 'block';
-                return;
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
             }
+        });
 
-            const API_BASE_URL = "https://worried-laurel-unmeasurably.ngrok-free.dev"; 
-            const API_URL = `${API_BASE_URL}/api/receipt/by-token/${token}`;
+        // Portfolio filtering
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const filterValue = this.getAttribute('data-filter');
+                const portfolioItems = document.querySelectorAll('.portfolio-item');
+                
+                portfolioItems.forEach(item => {
+                    if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
 
-            // --- REVISED PDF DOWNLOAD LOGIC ---
-            downloadButton.addEventListener('click', () => {
-                const downloadBtnSpan = downloadButton.querySelector('span');
-                if (!orderData || !window.jspdf) return;
-
-                downloadButton.disabled = true;
-                downloadBtnSpan.textContent = 'Generating PDF...';
-
-                try {
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF();
-                    const pageWidth = pdf.internal.pageSize.getWidth();
-                    const margin = 15;
-                    let y = 20;
-
-                    // --- PDF STYLING AND CONTENT ---
-                    pdf.setFont("helvetica", "bold");
-                    pdf.setFontSize(22);
-                    pdf.text("PrintEase", pageWidth / 2, y, { align: "center" });
-                    y += 8;
-                    
-                    pdf.setFont("helvetica", "normal");
-                    pdf.setFontSize(12);
-                    pdf.text("Official Order Receipt", pageWidth / 2, y, { align: "center" });
-                    y += 12;
-
-                    pdf.setLineWidth(0.2);
-                    pdf.line(margin, y, pageWidth - margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    const addLineItem = (label, value) => {
-                        pdf.setFont("helvetica", "bold");
-                        pdf.text(label, margin, y);
-                        pdf.setFont("helvetica", "normal");
-                        pdf.text(String(value), pageWidth - margin, y, { align: "right" });
-                        y += 7;
-                    };
-
-                    addLineItem("Order ID:", '#' + orderData.orderId.slice(-6).toUpperCase());
-                    addLineItem("Item:", orderData.itemName);
-                    addLineItem("Quantity:", orderData.quantity);
-                    addLineItem("Date:", document.getElementById('order-date').textContent);
-                    addLineItem("Status:", orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1));
-                    addLineItem("Payment:", orderData.modeOfPayment || 'N/A');
-                    y += 5;
-                    
-                    pdf.line(margin, y, pageWidth - margin, y);
-                    y += 10;
-                    
-                    pdf.setFont("helvetica", "bold");
-                    pdf.setFontSize(14);
-                    pdf.text("Total Price", margin, y);
-                    pdf.text(document.getElementById('total-price').textContent, pageWidth - margin, y, { align: "right" });
-                    
-                    pdf.save(`PrintEase-Receipt-${orderData.orderId.slice(-6)}.pdf`);
-                    
-                    downloadBtnSpan.textContent = 'Downloaded!';
-                    setTimeout(() => {
-                        downloadButton.disabled = false;
-                        downloadBtnSpan.textContent = 'Download Receipt';
-                    }, 2000);
-
-                } catch (err) {
-                    console.error("PDF generation failed:", err);
-                    downloadBtnSpan.textContent = 'Download Failed';
-                     setTimeout(() => {
-                        downloadButton.disabled = false;
-                        downloadBtnSpan.textContent = 'Download Receipt';
-                    }, 3000);
+        // Animate skill bars on scroll
+        function animateSkillBars() {
+            const skillBars = document.querySelectorAll('.skill-progress');
+            
+            skillBars.forEach(bar => {
+                const barPosition = bar.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.3;
+                
+                if (barPosition < screenPosition) {
+                    const width = bar.getAttribute('data-width');
+                    bar.style.width = width + '%';
                 }
             });
+        }
 
+        // Initialize skill bars with 0 width
+        document.querySelectorAll('.skill-progress').forEach(bar => {
+            bar.style.width = '0%';
+        });
 
-            // --- Main Data Fetching Logic ---
-            fetch(API_URL, { headers: { 'ngrok-skip-browser-warning': 'true' } })
-            .then(response => {
-                if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                orderData = data; 
-                document.getElementById('order-id').textContent = '#' + data.orderId.slice(-6).toUpperCase();
-                document.getElementById('item-name').textContent = data.itemName;
-                document.getElementById('quantity').textContent = data.quantity;
-                document.getElementById('status').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                document.getElementById('payment-mode').textContent = data.modeOfPayment || 'N/A';
+        // Animate skill bars when page loads
+        window.addEventListener('load', animateSkillBars);
+        
+        // Animate skill bars on scroll
+        window.addEventListener('scroll', animateSkillBards);
+
+        // Form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! I will get back to you soon.');
+            this.reset();
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
                 
-                const formattedPrice = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(data.totalPrice);
-                document.getElementById('total-price').textContent = formattedPrice;
-
-                let formattedDate = 'N/A';
-                if (data.orderDate) {
-                    try {
-                        formattedDate = new Date(data.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-                    } catch (e) {
-                        formattedDate = data.orderDate.split('T')[0];
-                    }
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
                 }
-                document.getElementById('order-date').textContent = formattedDate;
-
-                loadingEl.style.display = 'none';
-                receiptContentEl.style.display = 'block';
-            })
-            .catch(err => {
-                console.error('Failed to fetch receipt:', err);
-                loadingEl.style.display = 'none';
-                let errorMessage = `<strong>Error:</strong><br>${err.message}`;
-                if (err.message.includes('Failed to fetch')) errorMessage += '<br><br>This is a CORS or network issue. Check the ngrok and server terminals.';
-                errorEl.innerHTML = errorMessage;
-                errorEl.style.display = 'block';
             });
         });
     </script>
 </body>
 </html>
-
